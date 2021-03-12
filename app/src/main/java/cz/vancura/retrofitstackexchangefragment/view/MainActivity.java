@@ -38,6 +38,9 @@ import static cz.vancura.retrofitstackexchangefragment.viewmodel.MainActivityVie
 import static cz.vancura.retrofitstackexchangefragment.viewmodel.MainActivityViewModel.retrofitUrlPage;
 import static cz.vancura.retrofitstackexchangefragment.viewmodel.MainActivityViewModel.userPojoList;
 
+/*
+MainActivity - Launcher
+ */
 
 public class MainActivity extends AppCompatActivity {
 
@@ -73,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
         toolbar.setTitle(getTitle());
 
         // If this view is present, then the activity should be in two-pane mode.
+        // true = wide screen (landscape), false = small (portrait)
         if (findViewById(R.id.item_detail_container) != null) {
             mTwoPane = true;
         }
@@ -104,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onChanged(List<UserPOJO> userPOJOS) {
                 Log.d(TAG, "LiveData changed - observer - can update GUI now..");
+                // Gui update - can be called from here, or directly from ViewModel
             }
         };
         mainActivityViewModel.getLiveData().observe(this, observer);
@@ -119,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         // RecyclerView onCLick
+        // via custom RecyclerTouchListener class
         mRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), mRecyclerView, new RecyclerClickInterface() {
 
             @Override
@@ -126,12 +132,12 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "onClick position=" + position);
                 //Toast.makeText(context, "onClick " + position, Toast.LENGTH_SHORT).show();
 
-                // if wide like tablet - fragments are side-by-side
                 if (mTwoPane) {
+                    // if wide - like tablet - fragments are side-by-side
                     // show Fragment
                     Log.d(TAG, "launching DetailFragment..");
                     Bundle arguments = new Bundle();
-                    arguments.putString(DetailFragment.ARG_ITEM_ID, String.valueOf(position)); // param must be String, why ?
+                    arguments.putString(DetailFragment.ARG_ITEM_ID, String.valueOf(position)); // param must be String
                     DetailFragment fragment = new DetailFragment();
                     fragment.setArguments(arguments);
                     getSupportFragmentManager().beginTransaction()
@@ -198,51 +204,15 @@ public class MainActivity extends AppCompatActivity {
 
 
         // read data after start
-        GetData();
+        mainActivityViewModel.GetData();
 
     }
 
 
-
-    // Give new data
-    public static void GetData(){
-
-        Log.d(TAG, "GetData()");
-
-        // GUI - loading
-        GUIloading();
-
-
-        if (HelperMethods.isNetworkAvailable(context)) {
-
-            // if online - fetch data from Http
-            Log.d(TAG, "device is online");
-            mTextviewStatus.setText("online");
-            // fetch data from Http
-            mainActivityViewModel.gimeMeRetrofitData(retrofitUrlPage);
-
-        }else {
-
-            // if offline - fetch data from Room dB backup
-            mTextviewStatus.setText("offline");
-
-            if (roomDataExitst) {
-                Log.d(TAG, "device is offline - we have offline data in room db");
-                // fetch data from room dB
-                mainActivityViewModel.gimeMeRoomData();
-            }else{
-                // no data from http or room dB
-                Log.d(TAG, "device is offline - we have no data - so sad ..");
-                ShowDataGUI(false, "No data - go online to get it ..");
-            }
-        }
-
-
-    }
 
 
     // GUI - refresh screen based on result
-    public static void ShowDataGUI(Boolean status, String what){
+    public static void GUIShowData(Boolean status, String what){
 
         Log.d(TAG, "ShowDataGUI() - userPojoList size=" + userPojoList.size());
 
@@ -263,16 +233,15 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     Log.d(TAG, "Refresh data now after ERROR ..");
-                    GetData();
+                    mainActivityViewModel.GetData();
                 }
             });
         }
 
     }
 
-
     // GUI - show Progress bar only
-    private static void GUIloading(){
+    public static void GUIloading(){
         mProgressBar.setVisibility(View.VISIBLE);
         mTextviewError.setVisibility(View.INVISIBLE);
         mButtonRefresh.setVisibility(View.INVISIBLE);
@@ -296,6 +265,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // GUI - setText for TextView
+    public static void GUITextVieSet(String what){
+        mTextviewStatus.setText(what);
+    }
+
+
+
     // Menu - init
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -311,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "menu selected " + item);
 
         if (item.getItemId() == (R.id.action_refresh)) {
-           GetData();
+            mainActivityViewModel.GetData();
         }
 
         return super.onOptionsItemSelected(item);

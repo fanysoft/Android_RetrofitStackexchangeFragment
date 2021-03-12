@@ -58,10 +58,10 @@ public class DetailFragment extends Fragment {
 
             String recievedPositionString = getArguments().getString(ARG_ITEM_ID);
             recievedPosition = Integer.valueOf(recievedPositionString);
-            Log.d(TAG, "recieved position ="  + recievedPosition);
+            Log.d(TAG, "received position ="  + recievedPosition);
 
         }else{
-            Log.d(TAG, "not recieved position");
+            Log.d(TAG, "not received position");
         }
 
     }

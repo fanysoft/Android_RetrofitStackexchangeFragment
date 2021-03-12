@@ -17,6 +17,9 @@ import java.util.List;
 import cz.vancura.retrofitstackexchangefragment.R;
 import cz.vancura.retrofitstackexchangefragment.model.UserPOJO;
 
+/*
+RecyclerView Adapter
+ */
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyViewHolder>{
 

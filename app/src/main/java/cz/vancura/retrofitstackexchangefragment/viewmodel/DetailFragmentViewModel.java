@@ -19,7 +19,7 @@ public class DetailFragmentViewModel extends ViewModel {
         UserPOJO user = userPojoList.get(position);
 
         String textTitle = user.getUser_name();
-        String textBody = "position=" + position + "\n" + "user name=" + user.getUser_name() + "\n" + "id=" + user.getUser_id();
+        String textBody = "User position=" + position + "\n" + "User name=" + user.getUser_name() + "\n" + "User id=" + user.getUser_id();
         String imgUrl = user.getUser_icon_url();
 
         // update Fragment GUI

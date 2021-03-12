@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+import cz.vancura.retrofitstackexchangefragment.helper.HelperMethods;
 import cz.vancura.retrofitstackexchangefragment.model.UserPOJO;
 import cz.vancura.retrofitstackexchangefragment.model.retrofit.RetrofitAPIClient;
 import cz.vancura.retrofitstackexchangefragment.model.retrofit.RetrofitAPIInterface;
@@ -20,21 +21,28 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static cz.vancura.retrofitstackexchangefragment.view.MainActivity.GUIShowData;
+import static cz.vancura.retrofitstackexchangefragment.view.MainActivity.GUITextVieSet;
+import static cz.vancura.retrofitstackexchangefragment.view.MainActivity.roomDataExitst;
 import static cz.vancura.retrofitstackexchangefragment.view.MainActivity.sharedPrefEditor;
 
+/*
+MVVM - ViewModel for MainActivity
+ */
 
 public class MainActivityViewModel extends ViewModel {
 
     // Variables
     private static String TAG = "myTAG-MainActivityViewModel";
 
-    RetrofitAPIInterface retrofitAPIInterface = RetrofitAPIClient.getClient().create(RetrofitAPIInterface.class);
-    static RoomUserRepository roomUserRepository;
+    // room dB
+    private static RoomUserRepository roomUserRepository;
 
-    // retrofit config
+    // retrofit Http
+    private static RetrofitAPIInterface retrofitAPIInterface = RetrofitAPIClient.getClient().create(RetrofitAPIInterface.class);
     public static int retrofitUrlPage = 1;
-    int retrofitUrlPagesize = 15;
-    String retrofitUrlSite = "stackoverflow";
+    static int retrofitUrlPagesize = 15;
+    static String retrofitUrlSite = "stackoverflow";
     public static boolean retrofitShouldLoadMore = true;
 
     // Lists
@@ -51,8 +59,48 @@ public class MainActivityViewModel extends ViewModel {
     }
 
 
-    // if online - get data from Retrofit
-    public void gimeMeRetrofitData(int urlPage) {
+    // prepare data
+    public static void GetData(){
+
+        Log.d(TAG, "GetData()");
+
+        // GUI - loading
+        MainActivity.GUIloading();
+
+        // ? online
+        if (HelperMethods.isNetworkAvailable(MainActivity.context)) {
+
+            // if online - fetch data from Http
+            Log.d(TAG, "device is online");
+            GUITextVieSet("online");
+
+            // fetch data from Http
+            gimeMeRetrofitData(retrofitUrlPage);
+
+            // idea: delete RoomdB here to keep only fresh data
+
+        }else {
+
+            // if offline - fetch data from Room dB backup - if exists
+            GUITextVieSet("offline");
+
+            if (roomDataExitst) {
+                Log.d(TAG, "device is offline - we have offline data in room db");
+                // fetch data from room dB
+                gimeMeRoomData();
+            }else{
+                // no data from http or room dB
+                Log.d(TAG, "device is offline - we have no data - so sad ..");
+                GUIShowData(false, "No data - go online to get it ..");
+            }
+        }
+
+
+    }
+
+
+    // if online - get data from Retrofit, store it in List and LiveDataList
+    public static void gimeMeRetrofitData(int urlPage) {
 
         Log.d(TAG, "gimeMeRetrofitData - page=" + urlPage);
 
@@ -80,7 +128,7 @@ public class MainActivityViewModel extends ViewModel {
                     //Log.d(TAG, "data - level 1 - hasMore=" + resource.hasMore);
                     //Log.d(TAG, "data - level 1 - backoff=" + resource.backoff);
                     //Log.d(TAG, "data - level 1 - quota_max=" + resource.quotaMax);
-                    Log.d(TAG, "data - level 1 - quota_remaining=" + resource.quotaRemaining);
+                    Log.d(TAG, "data - level 1 - quota_remaining=" + resource.quotaRemaining); // server returns quota info
 
                     List<RetrofitUserPOJO.Item> itemList = resource.items;
                     //Log.d(TAG, "data - level 1 - items=" + itemList);
@@ -117,10 +165,10 @@ public class MainActivityViewModel extends ViewModel {
                         Log.d(TAG, "Adding new user to Room DB ..");
                         RoomUserPOJO roomUserPOJO = new RoomUserPOJO(owner.userId, owner.displayName, owner.profileImage);
                         roomUserRepository.insertUser(MainActivity.context, roomUserPOJO);
+
                         // write to SharedPred that we have offline data
                         sharedPrefEditor.putBoolean("roomDataExists", true);
                         sharedPrefEditor.apply();
-
 
                         i++;
 
@@ -128,10 +176,10 @@ public class MainActivityViewModel extends ViewModel {
 
 
                     retrofitShouldLoadMore = true;
-
-                    // ok
-                    Log.d(TAG, "Retrofit finished, now refresh GUI");
-                    MainActivity.ShowDataGUI(true, "");
+                    
+                    Log.d(TAG, "Retrofit finished, List size=" + userPojoList.size() + "  now refresh GUI");
+                    GUIShowData(true, "");
+                    // LiveData update
                     userPojoListLiveData.setValue(userPojoList);
 
                 }else{
@@ -139,9 +187,9 @@ public class MainActivityViewModel extends ViewModel {
                     retrofitShouldLoadMore = true;
 
                     // ng - response Code is not 200
-                    // example 400 Bad Request - server vraci "Violation of backoff parameter","error_name":"throttle_violation" - kdyz je tam moc requestu za cas
-                    Log.e(TAG, "Retrofit has troubles .. ");
-                    MainActivity.ShowDataGUI(false, "Retrofit ERROR " + urlResponseCode);
+                    // example 400 Bad Request - server vraci "Violation of backoff parameter","error_name":"throttle_violation" - ochrana na strane server - moc requestu za cas
+                    Log.e(TAG, "Retrofit has troubles - response code in not 200 " + urlResponseCode);
+                    GUIShowData(false, "Retrofit ERROR " + urlResponseCode + " Too many server requests - try it again later");
 
                 }
 
@@ -152,15 +200,15 @@ public class MainActivityViewModel extends ViewModel {
             public void onFailure(Call<RetrofitUserPOJO> call, Throwable t) {
                 String ErrorMessage = "ERROR " + t.getLocalizedMessage();
                 Log.e(TAG, ErrorMessage);
-                MainActivity.ShowDataGUI(false, ErrorMessage);
+                GUIShowData(false, ErrorMessage);
                 call.cancel();
             }
         });
 
     }
 
-    // if offline - get data from backup in Room dB
-    public void gimeMeRoomData() {
+    // if offline and persistence data exists in Room dB - get data from backup
+    public static void gimeMeRoomData() {
 
         RoomUserRepository roomUserRepository = new RoomUserRepository(MainActivity.context);
         roomUserRepository.getAllUsers(MainActivity.context);

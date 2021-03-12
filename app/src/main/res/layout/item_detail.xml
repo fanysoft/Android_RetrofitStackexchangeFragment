@@ -9,11 +9,16 @@
     <TextView
         android:id="@+id/textview_detail"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="item detail"
-        android:textSize="15sp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:padding="16dp"
+        android:text="item detail"
         android:textIsSelectable="true"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:context=".view.DetailFragment" />
 
     <ImageView
@@ -28,6 +33,20 @@
         app:layout_collapseMode="parallax"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textview_fooText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:padding="16dp"
+        android:text="@string/lorem_ipsum"
+        android:textIsSelectable="true"
+        android:textSize="15sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/image_detail" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

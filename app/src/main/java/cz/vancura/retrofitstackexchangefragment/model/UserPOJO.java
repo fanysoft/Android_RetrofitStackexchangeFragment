@@ -2,6 +2,9 @@ package cz.vancura.retrofitstackexchangefragment.model;
 
 import android.util.Log;
 
+/*
+POJO class
+ */
 
 public class UserPOJO {
 
@@ -13,7 +16,7 @@ public class UserPOJO {
 
 
     public UserPOJO(int user_id, String user_name, String user_icon_url) {
-        Log.d(TAG, "new UserPOJO created");
+        Log.d(TAG, "new UserPOJO created " + user_name);
         this.user_id = user_id;
         this.user_name = user_name;
         this.user_icon_url = user_icon_url;

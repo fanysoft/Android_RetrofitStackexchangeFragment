@@ -7,6 +7,7 @@
     android:fitsSystemWindows="true"
     tools:context=".view.MainActivity">
 
+    <!-- AppBar and Toolbar -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
@@ -21,12 +22,14 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <!-- FrameLayout - for data -->
     <FrameLayout
         android:id="@+id/frameLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <!-- Include layout -->
         <include layout="@layout/main_item_list" />
 
     </FrameLayout>

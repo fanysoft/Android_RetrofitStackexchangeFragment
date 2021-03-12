@@ -6,6 +6,10 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+/*
+Room dB - POJO class
+ */
+
 @Entity
 public class RoomUserPOJO {
 

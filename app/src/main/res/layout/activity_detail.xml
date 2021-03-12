@@ -15,6 +15,7 @@
         android:fitsSystemWindows="true"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
+        <!-- Collapsing Toolbar -->
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/toolbar_layout"
             android:layout_width="match_parent"
@@ -24,6 +25,7 @@
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:toolbarId="@+id/toolbar">
 
+            <!-- Image in Collapsing Toolbar -->
             <ImageView
                 android:id="@+id/toolbarImage"
                 android:layout_width="match_parent"
@@ -44,6 +46,7 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <!-- ScrollView with content -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/item_detail_container"
         android:layout_width="match_parent"

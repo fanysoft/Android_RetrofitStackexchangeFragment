@@ -8,7 +8,9 @@ import androidx.room.Query;
 
 import java.util.List;
 
-
+/*
+Room dB - Data Access Object - queries on dB data
+ */
 @Dao
 public interface RoomUserDao {
 

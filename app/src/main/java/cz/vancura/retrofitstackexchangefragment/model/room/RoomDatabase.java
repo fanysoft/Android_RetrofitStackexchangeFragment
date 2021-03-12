@@ -5,6 +5,10 @@ import android.content.Context;
 import androidx.room.Database;
 import androidx.room.Room;
 
+/*
+Room DB - get dB instance
+ */
+
 @Database(entities = {RoomUserPOJO.class}, version = 1)
 public abstract class RoomDatabase extends androidx.room.RoomDatabase {
 

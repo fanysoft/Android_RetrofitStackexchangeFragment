@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 /*
-POJO class based on JSON structure
+POJO class based on JSON structure / Rest API
  */
 
 public class RetrofitUserPOJO {

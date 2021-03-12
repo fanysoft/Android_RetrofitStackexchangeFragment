@@ -7,16 +7,20 @@ import android.net.NetworkInfo;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 /**
  * Class with Helper methods
+ * Could be singelton pattern
  */
 
 public class HelperMethods {
 
-
-    // is online ?
+    // is device online ?
+    // returns true/false
+    // TODO add listener for internet status change
+    // see https://stackoverflow.com/questions/25678216/android-internet-connectivity-change-listener
     public static boolean isNetworkAvailable(Context context) {
 
         ConnectivityManager manager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -30,14 +34,15 @@ public class HelperMethods {
     }
 
     // convert EPOCH time to human-readable
+    /*
     public static String ConvertEPOCH(String inputDate){
 
         String result = "no date";
 
         if (inputDate != "null") {
 
-            Date date = new Date(Integer.valueOf(inputDate));
-            DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            Date date = new Date(Integer.parseInt(inputDate));
+            DateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.GERMAN);
             format.setTimeZone(TimeZone.getTimeZone("Etc/UTC"));
             result = format.format(date);
 
@@ -45,7 +50,7 @@ public class HelperMethods {
 
         return result;
     }
-
+    */
 
 
 
