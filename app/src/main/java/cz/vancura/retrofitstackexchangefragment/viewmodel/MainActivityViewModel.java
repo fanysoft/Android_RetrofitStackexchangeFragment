@@ -1,6 +1,8 @@
 package cz.vancura.retrofitstackexchangefragment.viewmodel;
 
 
+import android.app.Application;
+import android.content.Context;
 import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
@@ -10,14 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-
 import cz.vancura.retrofitstackexchangefragment.model.UserPOJO;
 import cz.vancura.retrofitstackexchangefragment.model.retrofit.RetrofitAPIClient;
 import cz.vancura.retrofitstackexchangefragment.model.retrofit.RetrofitAPIInterface;
 import cz.vancura.retrofitstackexchangefragment.model.retrofit.RetrofitUserPOJO;
 import cz.vancura.retrofitstackexchangefragment.model.room.RoomUserPOJO;
 import cz.vancura.retrofitstackexchangefragment.model.room.RoomUserRepository;
-import cz.vancura.retrofitstackexchangefragment.view.MainActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -59,6 +59,7 @@ public class MainActivityViewModel extends ViewModel {
         return userPojoListLiveData;
     }
 
+
     // LiveData getter
     public MutableLiveData<String> getLiveDataError() {
         if (errorLiveData == null) {
@@ -67,6 +68,11 @@ public class MainActivityViewModel extends ViewModel {
         return errorLiveData;
     }
 
+    // workaround - unable to create non-zero-constructor for ViewModel when extends ViewModel, was possible with extends AndroidViewModel
+    public void init(Context context) {
+        Log.d(TAG, "ViewModel init");
+        roomUserRepository = new RoomUserRepository(context);
+    }
 
 
     // if online - get data from Retrofit, store it in List and LiveDataList
@@ -74,7 +80,8 @@ public class MainActivityViewModel extends ViewModel {
 
         Log.d(TAG, "gimeMeRetrofitData - page=" + urlPage);
 
-        roomUserRepository = new RoomUserRepository(MainActivity.context);
+
+        //roomUserRepository = new RoomUserRepository(MainActivity.context);
 
         retrofitShouldLoadMore = false;
 
@@ -135,7 +142,8 @@ public class MainActivityViewModel extends ViewModel {
                         // add new User to RoomDB for later offline use
                         Log.d(TAG, "Adding new user to Room DB ..");
                         RoomUserPOJO roomUserPOJO = new RoomUserPOJO(owner.userId, owner.displayName, owner.profileImage);
-                        roomUserRepository.insertUser(MainActivity.context, roomUserPOJO);
+
+                        roomUserRepository.insertUser(roomUserPOJO);
 
                         // write to SharedPred that we have offline data
                         sharedPrefEditor.putBoolean("roomDataExists", true);
@@ -189,8 +197,8 @@ public class MainActivityViewModel extends ViewModel {
     // if offline and persistence data exists in Room dB - get data from backup
     public static void gimeMeRoomData() {
 
-        RoomUserRepository roomUserRepository = new RoomUserRepository(MainActivity.context);
-        roomUserRepository.getAllUsers(MainActivity.context);
+        //RoomUserRepository roomUserRepository = new RoomUserRepository(MainActivity.context);
+        roomUserRepository.getAllUsers();
 
     }
 

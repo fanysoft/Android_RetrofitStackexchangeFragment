@@ -27,10 +27,12 @@ public class RoomUserRepository {
     // dao for interaction with the database
     private RoomUserDao roomUserDao;
 
+    Context context;
 
     // constructor
     public RoomUserRepository(Context context) {
         Log.d(TAG, "constructor");
+        this.context = context;
         db = RoomDatabase.getDatabase(context);
         roomUserDao = db.userDao();
     }
@@ -39,7 +41,7 @@ public class RoomUserRepository {
     ////////////////////////////////////////////////////////////////////////////// READ
 
     // db read wrapper
-    public void getAllUsers(Context context) {
+    public void getAllUsers() {
         Log.d(TAG, "getAllUsers");
         new ReadAsyncTask((MainActivity)context).execute();
     }
@@ -104,8 +106,8 @@ public class RoomUserRepository {
     ////////////////////////////////////////////////////////////////////////////// INSERT
 
     // insert wrapper
-    public void insertUser (Context context, RoomUserPOJO user) {
-        new InsertAsyncTask((MainActivity)context, user).execute();
+    public void insertUser (RoomUserPOJO user) {
+        new InsertAsyncTask((MainActivity) context, user).execute();
     }
 
 

@@ -9,7 +9,6 @@ import com.google.android.material.appbar.CollapsingToolbarLayout;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,7 +18,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import cz.vancura.retrofitstackexchangefragment.R;
-import cz.vancura.retrofitstackexchangefragment.viewmodel.DetailFragmentViewModel;
+import cz.vancura.retrofitstackexchangefragment.model.UserPOJO;
+
+import static cz.vancura.retrofitstackexchangefragment.viewmodel.MainActivityViewModel.userPojoList;
 
 
 /**
@@ -32,15 +33,11 @@ public class DetailFragment extends Fragment {
 
     private static String TAG = "myTAG-DetailFragment";
 
-    private DetailFragmentViewModel detailFragmentViewModel;
-
     public static final String ARG_ITEM_ID = "item_id";
-
     int recievedPosition = 0;
 
-    static View rootView;
-
-    static Activity activity;
+    View rootView;
+    Activity activity;
 
     // empty constructor
     public DetailFragment() {
@@ -57,11 +54,11 @@ public class DetailFragment extends Fragment {
         if (getArguments().containsKey(ARG_ITEM_ID)) {
 
             String recievedPositionString = getArguments().getString(ARG_ITEM_ID);
-            recievedPosition = Integer.valueOf(recievedPositionString);
+            recievedPosition = Integer.parseInt(recievedPositionString);
             Log.d(TAG, "received position ="  + recievedPosition);
 
         }else{
-            Log.d(TAG, "not received position");
+            Log.e(TAG, "not received position");
         }
 
     }
@@ -82,15 +79,21 @@ public class DetailFragment extends Fragment {
 
         Log.d(TAG, "onActivityCreated");
 
-        // ViewModel
-        detailFragmentViewModel = new ViewModelProvider(this).get(DetailFragmentViewModel.class);
-        DetailFragmentViewModel.GiveUserDetails(recievedPosition);
+        // data
+        UserPOJO user = userPojoList.get(recievedPosition);
+
+        String textTitle = user.getUser_name();
+        String textBody = "User position=" + recievedPosition + "\n" + "User name=" + user.getUser_name() + "\n" + "User id=" + user.getUser_id();
+        String imgUrl = user.getUser_icon_url();
+
+        // update Fragment GUI
+        RefreshGUIFragment(textTitle, textBody, imgUrl);
 
 
     }
 
 
-    public static void RefreshGUIFragment(String title, String body, String iconUrl){
+    public void RefreshGUIFragment(String title, String body, String iconUrl){
 
         Log.d(TAG, "RefreshGUIFragment ..");
 

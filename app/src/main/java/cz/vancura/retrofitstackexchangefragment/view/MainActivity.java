@@ -44,12 +44,11 @@ MainActivity - Launcher
 
 public class MainActivity extends AppCompatActivity {
 
-    private static String TAG = "myTAG-MainActivity";
+    private static final String TAG = "myTAG-MainActivity";
 
     private static MainActivityViewModel mainActivityViewModel;
 
-    // TODO check app for memory leaks - remote static references
-    public static Context context;
+    public Context context;
 
     private boolean mTwoPane;
 
@@ -92,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
 
         // ViewModel
         mainActivityViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
+        // workaround - unable to create non-zero-constructor for ViewModel when extends ViewModel, was possible with extends AndroidViewModel
+        mainActivityViewModel.init(context);
 
         // SharedPref
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);

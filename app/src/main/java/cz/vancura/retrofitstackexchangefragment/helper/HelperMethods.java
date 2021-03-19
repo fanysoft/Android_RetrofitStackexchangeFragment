@@ -19,7 +19,7 @@ public class HelperMethods {
 
     // is device online ?
     // returns true/false
-    // TODO add listener for internet status change
+    // Idea : add listener for internet status change
     // see https://stackoverflow.com/questions/25678216/android-internet-connectivity-change-listener
     public static boolean isNetworkAvailable(Context context) {
 
