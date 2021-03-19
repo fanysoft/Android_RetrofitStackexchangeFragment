@@ -232,7 +232,6 @@ public class MainActivity extends AppCompatActivity {
     // Choose according to internet connection where to read data from ..
     private void GetData(){
 
-
         // GUI - loading
         GUIloading();
 
@@ -258,9 +257,10 @@ public class MainActivity extends AppCompatActivity {
         GUITextVieSet("online");
 
         // fetch data from Http
-        MainActivityViewModel.gimeMeRetrofitData(retrofitUrlPage);
+        mainActivityViewModel.gimeMeRetrofitData(retrofitUrlPage);
 
-        // idea: delete RoomdB here to keep only fresh data
+        // IDEA: delete RoomdB here to keep only fresh data
+        // TODO IDEA: download data only once - after app start, not multiple times like device rotated or user returned from Detail
 
 
     }
@@ -274,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
         if (roomDataExitst) {
             Log.d(TAG, "device is offline - we have offline data in room db");
             // fetch data from room dB
-            MainActivityViewModel.gimeMeRoomData();
+            mainActivityViewModel.gimeMeRoomData();
         }else{
             // no data from http or room dB
             Log.d(TAG, "device is offline - we have no data - so sad ..");

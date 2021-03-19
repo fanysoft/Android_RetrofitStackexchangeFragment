@@ -35,7 +35,7 @@ public class MainActivityViewModel extends ViewModel {
     private static String TAG = "myTAG-MainActivityViewModel";
 
     // room dB
-    private static RoomUserRepository roomUserRepository;
+    private RoomUserRepository roomUserRepository;
 
     // retrofit Http
     private static RetrofitAPIInterface retrofitAPIInterface = RetrofitAPIClient.getClient().create(RetrofitAPIInterface.class);
@@ -76,7 +76,7 @@ public class MainActivityViewModel extends ViewModel {
 
 
     // if online - get data from Retrofit, store it in List and LiveDataList
-    public static void gimeMeRetrofitData(int urlPage) {
+    public void gimeMeRetrofitData(int urlPage) {
 
         Log.d(TAG, "gimeMeRetrofitData - page=" + urlPage);
 
@@ -195,7 +195,7 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     // if offline and persistence data exists in Room dB - get data from backup
-    public static void gimeMeRoomData() {
+    public void gimeMeRoomData() {
 
         //RoomUserRepository roomUserRepository = new RoomUserRepository(MainActivity.context);
         roomUserRepository.getAllUsers();
