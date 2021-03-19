@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static MainActivityViewModel mainActivityViewModel;
 
+    // TODO check app for memory leaks
     public static Context context;
 
     private boolean mTwoPane;
@@ -56,10 +57,10 @@ public class MainActivity extends AppCompatActivity {
     public static SharedPreferences.Editor sharedPrefEditor;
 
     private static RecyclerView mRecyclerView;
-    private static RecyclerAdapter mAdapter;
-    private static ProgressBar mProgressBar;
-    private static TextView mTextviewError, mTextviewStatus;
-    private static Button mButtonRefresh;
+    private RecyclerAdapter mAdapter;
+    private ProgressBar mProgressBar;
+    private TextView mTextviewError, mTextviewStatus;
+    private Button mButtonRefresh;
 
     public static boolean roomDataExitst = false;
 
@@ -103,15 +104,29 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "after start - roomDataExitst does not exists so far");
         }
 
-        // LiveData Observer
+        // LiveData Observer - List of UserPOJO
         final Observer<List<UserPOJO>> observer = new Observer<List<UserPOJO>>() {
             @Override
             public void onChanged(List<UserPOJO> userPOJOS) {
-                Log.d(TAG, "LiveData changed - observer - can update GUI now..");
-                // Gui update - can be called from here, or directly from ViewModel
+                Log.d(TAG, "LiveData List of userPOJO changed - observer - can update GUI now..");
+                // Gui update
+                GUIShowData();
             }
         };
-        mainActivityViewModel.getLiveData().observe(this, observer);
+        mainActivityViewModel.getLiveDataUsers().observe(this, observer);
+
+        // LiveData Observer - Error String
+        final Observer<String> observerError = new Observer<String>() {
+            @Override
+            public void onChanged(String errorText) {
+                Log.d(TAG, "LiveData Error changed - observer - can update GUI now..");
+                // Gui update
+                GUIShowError(errorText);
+            }
+        };
+        mainActivityViewModel.getLiveDataError().observe(this, observerError);
+
+
 
         // RecyclerView setup
         mRecyclerView = findViewById(R.id.recycler_view);
@@ -165,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
                 //Log.d(TAG, "onScrolled - dx=" + dx + " dy=" + dy);
@@ -184,10 +199,11 @@ public class MainActivity extends AppCompatActivity {
 
                             Log.d(TAG, "load more data now ..");
                             Toast.makeText(context, "Loading more data ... ", Toast.LENGTH_SHORT).show();
+                            // TODO LATER can be merged with GetDataOnline
                             // page increment - load another data
                             retrofitUrlPage++;
                             // fetch data from Http
-                            mainActivityViewModel.gimeMeRetrofitData(retrofitUrlPage);
+                            MainActivityViewModel.gimeMeRetrofitData(retrofitUrlPage);
                         }
                         if (!HelperMethods.isNetworkAvailable(context)) {
                             Toast.makeText(context, "Offline mode - can not get new data ... ", Toast.LENGTH_SHORT).show();
@@ -203,45 +219,106 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        // read data after start
-        mainActivityViewModel.GetData();
+
+        // start
+        GetData();
 
     }
 
 
+    // Choose according to internet connection where to read data from ..
+    private void GetData(){
 
 
-    // GUI - refresh screen based on result
-    public static void GUIShowData(Boolean status, String what){
+        // GUI - loading
+        GUIloading();
 
-        Log.d(TAG, "ShowDataGUI() - userPojoList size=" + userPojoList.size());
+        // ? online
+        if (HelperMethods.isNetworkAvailable(context)) {
 
-        if (status) {
-            // result is OK, we have data
-            // GUI - stop loading - show data
-            GUIvalidData();
-            // refresh RecyclerView
-            mAdapter.notifyDataSetChanged();
+            GetDataOnline();
 
+        }else {
+
+            GetDataOffline();
+        }
+
+
+    }
+
+
+    // .. read data Online
+    private void GetDataOnline(){
+
+        // if online - fetch data from Http
+        Log.d(TAG, "device is online");
+        GUITextVieSet("online");
+
+        // fetch data from Http
+        MainActivityViewModel.gimeMeRetrofitData(retrofitUrlPage);
+
+        // idea: delete RoomdB here to keep only fresh data
+
+
+    }
+
+    // .. read data Offline from persistence if exists
+    private void GetDataOffline(){
+
+        // if offline - fetch data from Room dB backup - if exists
+        GUITextVieSet("offline");
+
+        if (roomDataExitst) {
+            Log.d(TAG, "device is offline - we have offline data in room db");
+            // fetch data from room dB
+            MainActivityViewModel.gimeMeRoomData();
         }else{
-            // error
-            // GUI - show error and refresh button
-            GUIerror();
-            mTextviewError.setText(what);
+            // no data from http or room dB
+            Log.d(TAG, "device is offline - we have no data - so sad ..");
 
-            mButtonRefresh.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d(TAG, "Refresh data now after ERROR ..");
-                    mainActivityViewModel.GetData();
-                }
-            });
+            GUIShowError("No data - go online to get it ..");
         }
 
     }
 
+
+
+    // GUI - refresh screen based on result
+    private void GUIShowData(){
+
+        Log.d(TAG, "ShowDataGUI() - userPojoList size=" + userPojoList.size());
+
+         // GUI - stop loading - show data
+         GUIvalidData();
+
+         // refresh RecyclerView
+         mAdapter.notifyDataSetChanged();
+
+    }
+
+    private void GUIShowError(String text){
+
+        Log.d(TAG, "GUIShowError");
+
+        // GUI - show error and refresh button
+        GUIerror();
+
+        mTextviewError.setText(text);
+
+        mButtonRefresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Refresh data now after ERROR ..");
+                GetData();
+            }
+        });
+
+    }
+
+
+
     // GUI - show Progress bar only
-    public static void GUIloading(){
+    public void GUIloading(){
         mProgressBar.setVisibility(View.VISIBLE);
         mTextviewError.setVisibility(View.INVISIBLE);
         mButtonRefresh.setVisibility(View.INVISIBLE);
@@ -249,7 +326,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // GUI - show RecyclerView only
-    private static void GUIvalidData() {
+    private void GUIvalidData() {
         mProgressBar.setVisibility(View.INVISIBLE);
         mTextviewError.setVisibility(View.INVISIBLE);
         mButtonRefresh.setVisibility(View.INVISIBLE);
@@ -257,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // GUI - show Error and Retry buton
-    private static void GUIerror(){
+    private void GUIerror(){
         mProgressBar.setVisibility(View.INVISIBLE);
         mTextviewError.setVisibility(View.VISIBLE);
         mButtonRefresh.setVisibility(View.VISIBLE);
@@ -266,7 +343,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // GUI - setText for TextView
-    public static void GUITextVieSet(String what){
+    public void GUITextVieSet(String what){
         mTextviewStatus.setText(what);
     }
 
@@ -287,7 +364,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "menu selected " + item);
 
         if (item.getItemId() == (R.id.action_refresh)) {
-            mainActivityViewModel.GetData();
+            GetData();
         }
 
         return super.onOptionsItemSelected(item);

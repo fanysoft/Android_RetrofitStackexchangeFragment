@@ -1,5 +1,6 @@
 package cz.vancura.retrofitstackexchangefragment.viewmodel;
 
+
 import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
@@ -9,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-import cz.vancura.retrofitstackexchangefragment.helper.HelperMethods;
+
 import cz.vancura.retrofitstackexchangefragment.model.UserPOJO;
 import cz.vancura.retrofitstackexchangefragment.model.retrofit.RetrofitAPIClient;
 import cz.vancura.retrofitstackexchangefragment.model.retrofit.RetrofitAPIInterface;
@@ -21,9 +22,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static cz.vancura.retrofitstackexchangefragment.view.MainActivity.GUIShowData;
-import static cz.vancura.retrofitstackexchangefragment.view.MainActivity.GUITextVieSet;
-import static cz.vancura.retrofitstackexchangefragment.view.MainActivity.roomDataExitst;
+
 import static cz.vancura.retrofitstackexchangefragment.view.MainActivity.sharedPrefEditor;
 
 /*
@@ -48,55 +47,26 @@ public class MainActivityViewModel extends ViewModel {
     // Lists
     public static List<UserPOJO> userPojoList = new ArrayList<>(); // List
     public static MutableLiveData<List<UserPOJO>> userPojoListLiveData; // LiveData List
+    // Error
+    public static MutableLiveData<String> errorLiveData; // LiveData String
 
 
-    // LiveData getter
-    public MutableLiveData<List<UserPOJO>> getLiveData() {
+    // LiveData getter - List of UserPOJO
+    public MutableLiveData<List<UserPOJO>> getLiveDataUsers() {
         if (userPojoListLiveData == null) {
             userPojoListLiveData = new MutableLiveData<List<UserPOJO>>();
         }
         return userPojoListLiveData;
     }
 
-
-    // prepare data
-    public static void GetData(){
-
-        Log.d(TAG, "GetData()");
-
-        // GUI - loading
-        MainActivity.GUIloading();
-
-        // ? online
-        if (HelperMethods.isNetworkAvailable(MainActivity.context)) {
-
-            // if online - fetch data from Http
-            Log.d(TAG, "device is online");
-            GUITextVieSet("online");
-
-            // fetch data from Http
-            gimeMeRetrofitData(retrofitUrlPage);
-
-            // idea: delete RoomdB here to keep only fresh data
-
-        }else {
-
-            // if offline - fetch data from Room dB backup - if exists
-            GUITextVieSet("offline");
-
-            if (roomDataExitst) {
-                Log.d(TAG, "device is offline - we have offline data in room db");
-                // fetch data from room dB
-                gimeMeRoomData();
-            }else{
-                // no data from http or room dB
-                Log.d(TAG, "device is offline - we have no data - so sad ..");
-                GUIShowData(false, "No data - go online to get it ..");
-            }
+    // LiveData getter
+    public MutableLiveData<String> getLiveDataError() {
+        if (errorLiveData == null) {
+            errorLiveData = new MutableLiveData<String>();
         }
-
-
+        return errorLiveData;
     }
+
 
 
     // if online - get data from Retrofit, store it in List and LiveDataList
@@ -107,6 +77,7 @@ public class MainActivityViewModel extends ViewModel {
         roomUserRepository = new RoomUserRepository(MainActivity.context);
 
         retrofitShouldLoadMore = false;
+
 
         // Retrofit HTTP call
         Call<RetrofitUserPOJO> call = retrofitAPIInterface.doGetUserList(urlPage, retrofitUrlPagesize, retrofitUrlSite);
@@ -151,12 +122,12 @@ public class MainActivityViewModel extends ViewModel {
                         //Log.d(TAG, "data - level 3 - loop in owner - user_id=" + owner.userId);
                         //Log.d(TAG, "data - level 3 - loop in owner - userType=" + owner.userType);
                         //Log.d(TAG, "data - level 3 - loop in owner - profileImage=" + owner.profileImage);
-                        Log.d(TAG, "data - level 3 - loop in owner - displayName=" + owner.displayName);
+                        //Log.d(TAG, "data - level 3 - loop in owner - displayName=" + owner.displayName);
                         //Log.d(TAG, "data - level 3 - loop in owner - link=" + owner.link);
 
 
                         // add new User to Master List
-                        Log.d(TAG, "Adding new user to List ..");
+                        //Log.d(TAG, "Adding new user to List ..");
                         UserPOJO userPOJO = new UserPOJO(owner.userId, owner.displayName, owner.profileImage);
                         userPojoList.add(userPOJO);
 
@@ -178,8 +149,8 @@ public class MainActivityViewModel extends ViewModel {
                     retrofitShouldLoadMore = true;
                     
                     Log.d(TAG, "Retrofit finished, List size=" + userPojoList.size() + "  now refresh GUI");
-                    GUIShowData(true, "");
-                    // LiveData update
+
+                    // LiveData update - will trigget GUI update via Observer
                     userPojoListLiveData.setValue(userPojoList);
 
                 }else{
@@ -189,7 +160,11 @@ public class MainActivityViewModel extends ViewModel {
                     // ng - response Code is not 200
                     // example 400 Bad Request - server vraci "Violation of backoff parameter","error_name":"throttle_violation" - ochrana na strane server - moc requestu za cas
                     Log.e(TAG, "Retrofit has troubles - response code in not 200 " + urlResponseCode);
-                    GUIShowData(false, "Retrofit ERROR " + urlResponseCode + " Too many server requests - try it again later");
+
+                    // LiveData upidate - will trigger GUI update
+                    String error = "Retrofit ERROR " + urlResponseCode + " Too many server requests - try it again later";
+                    errorLiveData.setValue(error);
+
 
                 }
 
@@ -198,9 +173,13 @@ public class MainActivityViewModel extends ViewModel {
 
             @Override
             public void onFailure(Call<RetrofitUserPOJO> call, Throwable t) {
-                String ErrorMessage = "ERROR " + t.getLocalizedMessage();
+                String ErrorMessage = "Retrofit ERROR " + t.getLocalizedMessage();
                 Log.e(TAG, ErrorMessage);
-                GUIShowData(false, ErrorMessage);
+
+                // LiveData upidate - will trigger GUI update
+                errorLiveData.setValue(ErrorMessage);
+
+                // cancel retrofit call
                 call.cancel();
             }
         });

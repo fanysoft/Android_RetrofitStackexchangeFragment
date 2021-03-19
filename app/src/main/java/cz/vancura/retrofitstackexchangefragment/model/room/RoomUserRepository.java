@@ -81,7 +81,8 @@ public class RoomUserRepository {
 
                 // UpdateGUI - ok
                 Log.d(TAG, "Room finished, now refresh GUI");
-                MainActivity.GUIShowData(true, "");
+                // TODO Gui update from RoomRepo - must be via LiveData
+                //MainActivity.GUIShowData(true, "");
 
 
             }else{
@@ -89,7 +90,8 @@ public class RoomUserRepository {
 
                 // UpdateGUI
                 Log.d(TAG, "Room finished, now refresh GUI");
-                MainActivity.GUIShowData(false, "No data in dB");
+                // TODO Gui update from RoomRepo - must be via LiveData
+                //MainActivity.GUIShowData(false, "No data in dB");
 
             }
 
