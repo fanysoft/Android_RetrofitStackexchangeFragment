@@ -161,7 +161,7 @@ public class MainActivityViewModel extends ViewModel {
                     // example 400 Bad Request - server vraci "Violation of backoff parameter","error_name":"throttle_violation" - ochrana na strane server - moc requestu za cas
                     Log.e(TAG, "Retrofit has troubles - response code in not 200 " + urlResponseCode);
 
-                    // LiveData upidate - will trigger GUI update
+                    // LiveData update - will trigger GUI update
                     String error = "Retrofit ERROR " + urlResponseCode + " Too many server requests - try it again later";
                     errorLiveData.setValue(error);
 
@@ -176,7 +176,7 @@ public class MainActivityViewModel extends ViewModel {
                 String ErrorMessage = "Retrofit ERROR " + t.getLocalizedMessage();
                 Log.e(TAG, ErrorMessage);
 
-                // LiveData upidate - will trigger GUI update
+                // LiveData update - will trigger GUI update
                 errorLiveData.setValue(ErrorMessage);
 
                 // cancel retrofit call

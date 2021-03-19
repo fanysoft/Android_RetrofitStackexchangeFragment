@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static MainActivityViewModel mainActivityViewModel;
 
-    // TODO check app for memory leaks
+    // TODO check app for memory leaks - remote static references
     public static Context context;
 
     private boolean mTwoPane;
@@ -197,13 +197,15 @@ public class MainActivity extends AppCompatActivity {
 
                         if (retrofitShouldLoadMore && HelperMethods.isNetworkAvailable(context)) {
 
-                            Log.d(TAG, "load more data now ..");
-                            Toast.makeText(context, "Loading more data ... ", Toast.LENGTH_SHORT).show();
-                            // TODO LATER can be merged with GetDataOnline
+                            Log.d(TAG, "Trying to load more data now ..");
+                            Toast.makeText(context, "Trying to load more data ... ", Toast.LENGTH_SHORT).show();
+
                             // page increment - load another data
                             retrofitUrlPage++;
-                            // fetch data from Http
-                            MainActivityViewModel.gimeMeRetrofitData(retrofitUrlPage);
+
+                            // read more data ..
+                            GetDataOnline();
+
                         }
                         if (!HelperMethods.isNetworkAvailable(context)) {
                             Toast.makeText(context, "Offline mode - can not get new data ... ", Toast.LENGTH_SHORT).show();

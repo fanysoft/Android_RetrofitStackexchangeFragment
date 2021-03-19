@@ -101,7 +101,7 @@ public class DetailFragment extends Fragment {
             // text
             appBarLayout.setTitle(title);
             // pict
-            Glide.with(MainActivity.context)
+            Glide.with(activity)
                     .load(iconUrl)
                     .into((ImageView) appBarLayout.findViewById(R.id.toolbarImage));
         }else{
@@ -112,7 +112,7 @@ public class DetailFragment extends Fragment {
         ((TextView) rootView.findViewById(R.id.textview_detail)).setText(body);
 
         // Body img
-        Glide.with(MainActivity.context)
+        Glide.with(activity)
                 .load(iconUrl)
                 .into(((ImageView) rootView.findViewById(R.id.image_detail)));
 

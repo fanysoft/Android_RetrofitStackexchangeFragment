@@ -10,6 +10,7 @@ import java.util.List;
 import cz.vancura.retrofitstackexchangefragment.model.UserPOJO;
 import cz.vancura.retrofitstackexchangefragment.view.MainActivity;
 
+import static cz.vancura.retrofitstackexchangefragment.viewmodel.MainActivityViewModel.errorLiveData;
 import static cz.vancura.retrofitstackexchangefragment.viewmodel.MainActivityViewModel.userPojoList;
 import static cz.vancura.retrofitstackexchangefragment.viewmodel.MainActivityViewModel.userPojoListLiveData;
 
@@ -77,21 +78,22 @@ public class RoomUserRepository {
                 for (RoomUserPOJO user : users) {
                     userPojoList.add(new UserPOJO(user.getUser_id(), user.getUser_name(), user.getUser_icon_url()));
                 }
-                userPojoListLiveData.setValue(userPojoList);
 
                 // UpdateGUI - ok
-                Log.d(TAG, "Room finished, now refresh GUI");
-                // TODO Gui update from RoomRepo - must be via LiveData
-                //MainActivity.GUIShowData(true, "");
+                Log.d(TAG, "Room finished with data, now refresh GUI");
 
+                // LiveData update - will trigger GUI update
+                userPojoListLiveData.setValue(userPojoList);
 
             }else{
-                Log.d(TAG, "Room dB is empty");
+
+                // muze nastat pouze teoreticky, protoze pokud apka nema zadna data - zastavi se uz v MainActivity
 
                 // UpdateGUI
-                Log.d(TAG, "Room finished, now refresh GUI");
-                // TODO Gui update from RoomRepo - must be via LiveData
-                //MainActivity.GUIShowData(false, "No data in dB");
+                Log.d(TAG, "Room finished without data, now refresh GUI");
+
+                // LiveData update - will trigger GUI update
+                errorLiveData.setValue("No data in dB - sorry :(");
 
             }
 
