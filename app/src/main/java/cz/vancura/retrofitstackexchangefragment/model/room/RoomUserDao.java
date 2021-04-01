@@ -20,19 +20,25 @@ public interface RoomUserDao {
     List<RoomUserPOJO> getAllUsers();
 
     // read some by id from dB
-    @Query("SELECT * FROM roomuserpojo WHERE my_user_id IN (:userIds)")
-    List<RoomUserPOJO> getUserByIds(int[] userIds);
+    //@Query("SELECT * FROM roomuserpojo WHERE my_user_id IN (:userIds)")
+    //List<RoomUserPOJO> getUserByIds(int[] userIds);
 
-    // insert into dB
+
+    // insert into dB - one
+    //@Insert(onConflict = OnConflictStrategy.IGNORE)
+    //void insertUser(RoomUserPOJO... users);
+
+    // insert into dB - List
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insertUser(RoomUserPOJO... users);
+    void insertUsers(List<RoomUserPOJO> users);
+
 
     // delete from dB
-    @Delete
-    void delete(RoomUserPOJO user);
+    //@Delete
+    //void delete(RoomUserPOJO user);
 
     // delete from dB - all
     @Query("DELETE FROM roomuserpojo")
-    public void deleteAllData();
+    void deleteAllData();
 
 }

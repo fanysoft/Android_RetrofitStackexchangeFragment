@@ -118,15 +118,16 @@ public class RoomUserRepository {
 
     ////////////////////////////////////////////////////////////////////////////// INSERT
 
-    public void insertUser (RoomUserPOJO user) {
+    public void insertUsers (List<RoomUserPOJO> users) {
 
-        Log.d(TAG, "insertUser via ExecutorService");
+        Log.d(TAG, "insertUsers via ExecutorService");
 
         RoomDatabase.databaseWriteExecutor.execute(() -> {
-            roomUserDao.insertUser(user);
+            roomUserDao.insertUsers(users);
         });
 
     }
+
 
     ////////////////////////////////////////////////////////////////////////////// DELETE
 

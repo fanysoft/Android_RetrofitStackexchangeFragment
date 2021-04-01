@@ -84,6 +84,7 @@ public class MainActivityViewModel extends ViewModel {
         retrofitShouldLoadMore = false;
 
         List<UserPOJO> userPojoList = new ArrayList<>();
+        List<RoomUserPOJO> roomUserPojoList = new ArrayList<>();
 
         // Retrofit HTTP call
         Call<RetrofitUserPOJO> call = retrofitAPIInterface.doGetUserList(urlPage, retrofitUrlPagesize, retrofitUrlSite);
@@ -105,7 +106,7 @@ public class MainActivityViewModel extends ViewModel {
                     //Log.d(TAG, "data - level 1 - hasMore=" + resource.hasMore);
                     //Log.d(TAG, "data - level 1 - backoff=" + resource.backoff);
                     //Log.d(TAG, "data - level 1 - quota_max=" + resource.quotaMax);
-                    Log.d(TAG, "data - level 1 - quota_remaining=" + resource.quotaRemaining); // server returns quota info
+                    Log.d(TAG, "http data - level 1 - quota_remaining=" + resource.quotaRemaining); // server returns quota info
 
                     List<RetrofitUserPOJO.Item> itemList = resource.items;
                     //Log.d(TAG, "data - level 1 - items=" + itemList);
@@ -114,7 +115,7 @@ public class MainActivityViewModel extends ViewModel {
                     int i = 0;
                     for (RetrofitUserPOJO.Item item:itemList) {
 
-                        Log.d(TAG, "data - level 2 - loop in item  ________________________________________");
+                        Log.d(TAG, "http data - level 2 - loop in item  ________________________________________");
                         //Log.d(TAG, "data - level 2 - loop in item - isAccepted=" + item.isAccepted);
                         //Log.d(TAG, "data - level 2 - loop in itme - score=" + item.score);
                         //Log.d(TAG, "data - level 2 - loop in item - lastEditDate=" + item.lastEditDate);
@@ -131,34 +132,33 @@ public class MainActivityViewModel extends ViewModel {
                         //Log.d(TAG, "data - level 3 - loop in owner - link=" + owner.link);
 
 
-                        // add new User to Master List
-                        //Log.d(TAG, "Adding new user to List ..");
-                        // conversion of RetrofitUserPOJO into UserPOJO - for GUI use
+                        // conversion of RetrofitUserPOJO into UserPOJO
                         UserPOJO userPOJO = new UserPOJO(owner.userId, owner.displayName, owner.profileImage);
+                        // List of UserPojo - for LiveData and GUI use
                         userPojoList.add(userPOJO);
 
-
-                        // add new User to RoomDB for later offline use
-                        Log.d(TAG, "Adding new user to Room DB ..");
-                        // conversion of RetrofitUserPOJO into RoomUserPOJO - for dB user
+                        // conversion of RetrofitUserPOJO into RoomUserPOJO
                         RoomUserPOJO roomUserPOJO = new RoomUserPOJO(owner.userId, owner.displayName, owner.profileImage);
-
-                        roomUserRepository.insertUser(roomUserPOJO);
-
-                        // write to SharedPred that we have offline data
-                        sharedPrefEditor.putBoolean("roomDataExists", true);
-                        sharedPrefEditor.apply();
+                        // List of RoomUserPojo - for dB insert use
+                        roomUserPojoList.add(roomUserPOJO);
 
                         i++;
 
                     }
 
+                    // add List of Users to RoomDB for later offline use
+                    Log.d(TAG, "Adding List of users to Room DB ..");
+                    roomUserRepository.insertUsers(roomUserPojoList);
 
+                    // write to SharedPred that we have offline data
+                    sharedPrefEditor.putBoolean("roomDataExists", true);
+                    sharedPrefEditor.apply();
+
+                    // ready to load more data
                     retrofitShouldLoadMore = true;
-                    
-                    Log.d(TAG, "Retrofit finished, List size=" + userPojoList.size() + "  now refresh GUI");
 
                     // LiveData update - will trigget GUI update via Observer
+                    Log.d(TAG, "Retrofit finished, List size=" + userPojoList.size() + "  now refresh GUI");
                     userPojoListLiveData.setValue(userPojoList);
 
                 }else{
