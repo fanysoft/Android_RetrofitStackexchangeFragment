@@ -5,6 +5,9 @@ import android.content.Context;
 import androidx.room.Database;
 import androidx.room.Room;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /*
 Room DB - get dB instance
  */
@@ -14,6 +17,10 @@ public abstract class RoomDatabase extends androidx.room.RoomDatabase {
 
     public abstract RoomUserDao userDao();
     private static RoomDatabase dbInstance;
+
+    // Executor Service for Async threating
+    private static final int NUMBER_OF_THREADS = 4;
+    static final ExecutorService databaseWriteExecutor = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
 
     // create dB
     public static RoomDatabase getDatabase(final Context context) {

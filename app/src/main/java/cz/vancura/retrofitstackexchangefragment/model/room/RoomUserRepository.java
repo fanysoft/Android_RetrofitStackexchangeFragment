@@ -5,30 +5,30 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
 
 import cz.vancura.retrofitstackexchangefragment.model.UserPOJO;
 import cz.vancura.retrofitstackexchangefragment.view.MainActivity;
 
 import static cz.vancura.retrofitstackexchangefragment.viewmodel.MainActivityViewModel.errorLiveData;
-import static cz.vancura.retrofitstackexchangefragment.viewmodel.MainActivityViewModel.userPojoList;
 import static cz.vancura.retrofitstackexchangefragment.viewmodel.MainActivityViewModel.userPojoListLiveData;
 
 /*
 Room dB - repository - encapsulation of CRUD methods - here only ready and insert data from/to dB
  */
-// TODO AsyncTask is depreciated - replace
+
 
 public class RoomUserRepository {
 
     private static String TAG = "myTAG-RoomUserRepository";
 
+    Context context;
+
     // db instance
     static RoomDatabase db;
     // dao for interaction with the database
     private RoomUserDao roomUserDao;
-
-    Context context;
 
     // constructor
     public RoomUserRepository(Context context) {
@@ -41,9 +41,23 @@ public class RoomUserRepository {
 
     ////////////////////////////////////////////////////////////////////////////// READ
 
-    // db read wrapper
     public void getAllUsers() {
+
         Log.d(TAG, "getAllUsers");
+
+        // TODO AsyncTask is depreciated - replace by ExecutorService or RxJava
+        /*
+        db.databaseWriteExecutor.execute(() -> {
+            roomUserDao.getAllUsers();
+        });
+*/
+
+        // 1. get all users from db - returns List<RoomUserPOJO>
+        // 2. convert to List<UserPOJO>
+        // 3. pass to LiveData List in VM
+
+
+        // old - AsyncTask
         new ReadAsyncTask((MainActivity)context).execute();
     }
 
@@ -74,23 +88,21 @@ public class RoomUserRepository {
 
                 Log.d(TAG, "Room dB - size="+users.size());
 
-                // clear List - zabranit aby se data duplikovala po opakovanem Refresh
-                userPojoList.clear();
+                List<UserPOJO> list = new ArrayList<>();
 
                 // loop via List and fill in List
+                // conversion of RoomUserPOJO to UserPOJO - for GUI use
                 for (RoomUserPOJO user : users) {
-                    userPojoList.add(new UserPOJO(user.getUser_id(), user.getUser_name(), user.getUser_icon_url()));
+                    list.add(new UserPOJO(user.getUser_id(), user.getUser_name(), user.getUser_icon_url()));
                 }
 
-                // UpdateGUI - ok
                 Log.d(TAG, "Room finished with data, now refresh GUI");
-
                 // LiveData update - will trigger GUI update
-                userPojoListLiveData.setValue(userPojoList);
+                userPojoListLiveData.setValue(list);
 
             }else{
 
-                // muze nastat pouze teoreticky, protoze pokud apka nema zadna data - zastavi se uz v MainActivity
+                // teoretically
 
                 // UpdateGUI
                 Log.d(TAG, "Room finished without data, now refresh GUI");
@@ -106,38 +118,26 @@ public class RoomUserRepository {
 
     ////////////////////////////////////////////////////////////////////////////// INSERT
 
-    // insert wrapper
     public void insertUser (RoomUserPOJO user) {
-        new InsertAsyncTask((MainActivity) context, user).execute();
+
+        Log.d(TAG, "insertUser via ExecutorService");
+
+        RoomDatabase.databaseWriteExecutor.execute(() -> {
+            roomUserDao.insertUser(user);
+        });
+
     }
 
+    ////////////////////////////////////////////////////////////////////////////// DELETE
 
-    // db insert - async job
-    private static class InsertAsyncTask extends AsyncTask<Void, Void, Boolean> {
+    public void deleteAll () {
 
-        private WeakReference<MainActivity> activityReference;
-        private RoomUserPOJO user;
+        Log.d(TAG, "deleteAll via ExecutorService");
 
-        // only retain a weak reference to the activity
-        InsertAsyncTask(MainActivity context, RoomUserPOJO user) {
-            activityReference = new WeakReference<>(context);
-            this.user = user;
-        }
+        RoomDatabase.databaseWriteExecutor.execute(() -> {
+            roomUserDao.deleteAllData();
+        });
 
-        @Override
-        protected Boolean doInBackground(Void... objs) {
-            db.userDao().insertUser(user);
-            return true;
-        }
-
-        // onPostExecute runs on main thread
-        @Override
-        protected void onPostExecute(Boolean bool) {
-            //empty
-            Log.d(TAG, "InsertAsyncTask onPostExecute - user inserted into dB - user name=" + user.getUser_name());
-        }
     }
-
-
 
 }

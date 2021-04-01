@@ -1,5 +1,6 @@
 package cz.vancura.retrofitstackexchangefragment.model.room;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -29,5 +30,9 @@ public interface RoomUserDao {
     // delete from dB
     @Delete
     void delete(RoomUserPOJO user);
+
+    // delete from dB - all
+    @Query("DELETE FROM roomuserpojo")
+    public void deleteAllData();
 
 }

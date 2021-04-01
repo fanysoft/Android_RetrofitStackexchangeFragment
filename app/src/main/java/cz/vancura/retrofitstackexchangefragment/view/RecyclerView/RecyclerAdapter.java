@@ -80,4 +80,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
         int size = dataClassList.size();
         return size;
     }
+
+    // 6 - import list
+    public void importData(List<UserPOJO> inList){
+        dataClassList = inList;
+    }
+
+
 }

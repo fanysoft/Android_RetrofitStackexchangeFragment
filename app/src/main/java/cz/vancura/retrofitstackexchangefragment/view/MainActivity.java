@@ -32,11 +32,11 @@ import cz.vancura.retrofitstackexchangefragment.view.RecyclerView.RecyclerClickI
 import cz.vancura.retrofitstackexchangefragment.view.RecyclerView.RecyclerTouchListener;
 import cz.vancura.retrofitstackexchangefragment.viewmodel.MainActivityViewModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static cz.vancura.retrofitstackexchangefragment.viewmodel.MainActivityViewModel.retrofitShouldLoadMore;
 import static cz.vancura.retrofitstackexchangefragment.viewmodel.MainActivityViewModel.retrofitUrlPage;
-import static cz.vancura.retrofitstackexchangefragment.viewmodel.MainActivityViewModel.userPojoList;
 
 /*
 MainActivity - Launcher
@@ -57,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static RecyclerView mRecyclerView;
     private RecyclerAdapter mAdapter;
+    List<UserPOJO> userPojoListRecyclerView = new ArrayList<>();
+
     private ProgressBar mProgressBar;
     private TextView mTextviewError, mTextviewStatus;
     private Button mButtonRefresh;
@@ -91,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
         // ViewModel
         mainActivityViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
-        // workaround - unable to create non-zero-constructor for ViewModel when extends ViewModel, was possible with extends AndroidViewModel
+        // workaround for ViewModel constructor - unable to create non-zero-constructor for ViewModel when extends ViewModel, was possible with extends AndroidViewModel
         mainActivityViewModel.init(context);
 
         // SharedPref
@@ -101,17 +103,20 @@ public class MainActivity extends AppCompatActivity {
         if(sharedPref.contains("roomDataExists")){
             roomDataExitst = sharedPref.getBoolean("roomDataExists", false);
             Log.d(TAG, "after start - roomDataExitst=" + roomDataExitst);
+
         }else{
             Log.d(TAG, "after start - roomDataExitst does not exists so far");
         }
+
 
         // LiveData Observer - List of UserPOJO
         final Observer<List<UserPOJO>> observer = new Observer<List<UserPOJO>>() {
             @Override
             public void onChanged(List<UserPOJO> userPOJOS) {
                 Log.d(TAG, "LiveData List of userPOJO changed - observer - can update GUI now..");
+                userPojoListRecyclerView = userPOJOS;
                 // Gui update
-                GUIShowData();
+                GUIShowData(userPOJOS);
             }
         };
         mainActivityViewModel.getLiveDataUsers().observe(this, observer);
@@ -131,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
 
         // RecyclerView setup
         mRecyclerView = findViewById(R.id.recycler_view);
-        mAdapter = new RecyclerAdapter(userPojoList, this);
+        mAdapter = new RecyclerAdapter(userPojoListRecyclerView, this);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -259,7 +264,6 @@ public class MainActivity extends AppCompatActivity {
         // fetch data from Http
         mainActivityViewModel.gimeMeRetrofitData(retrofitUrlPage);
 
-        // TODO IDEA: delete RoomdB here to keep only fresh data
         // TODO IDEA: download data only once - after app start, not multiple times like after device was rotated or user returned from Detail
 
 
@@ -287,14 +291,17 @@ public class MainActivity extends AppCompatActivity {
 
 
     // GUI - refresh screen based on result
-    private void GUIShowData(){
+    private void GUIShowData(List<UserPOJO> userPOJOList){
 
-        Log.d(TAG, "ShowDataGUI() - userPojoList size=" + userPojoList.size());
+        Log.d(TAG, "ShowDataGUI() - userPojoList size=" + userPOJOList.size());
 
          // GUI - stop loading - show data
          GUIvalidData();
 
-         // refresh RecyclerView
+         // RecyclerView data
+         mAdapter.importData(userPOJOList);
+
+         // RecyclerView refresh
          mAdapter.notifyDataSetChanged();
 
     }
@@ -317,7 +324,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-
 
 
     // GUI - show Progress bar only

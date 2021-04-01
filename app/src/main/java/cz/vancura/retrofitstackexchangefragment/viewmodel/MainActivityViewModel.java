@@ -44,14 +44,10 @@ public class MainActivityViewModel extends ViewModel {
     static String retrofitUrlSite = "stackoverflow";
     public static boolean retrofitShouldLoadMore = true;
 
-    // Lists
-    public static List<UserPOJO> userPojoList = new ArrayList<>(); // List
-    public static MutableLiveData<List<UserPOJO>> userPojoListLiveData; // LiveData List
-    // Error
-    public static MutableLiveData<String> errorLiveData; // LiveData String
+    // Live Data List of UserPOJO
+    public static MutableLiveData<List<UserPOJO>> userPojoListLiveData;
 
-
-    // LiveData getter - List of UserPOJO
+    // Live Data List of UserPOJO getter
     public MutableLiveData<List<UserPOJO>> getLiveDataUsers() {
         if (userPojoListLiveData == null) {
             userPojoListLiveData = new MutableLiveData<List<UserPOJO>>();
@@ -59,8 +55,10 @@ public class MainActivityViewModel extends ViewModel {
         return userPojoListLiveData;
     }
 
+    // Live Data Error String
+    public static MutableLiveData<String> errorLiveData;
 
-    // LiveData getter
+    // Live Data Error String getter
     public MutableLiveData<String> getLiveDataError() {
         if (errorLiveData == null) {
             errorLiveData = new MutableLiveData<String>();
@@ -80,11 +78,12 @@ public class MainActivityViewModel extends ViewModel {
 
         Log.d(TAG, "gimeMeRetrofitData - page=" + urlPage);
 
-
-        //roomUserRepository = new RoomUserRepository(MainActivity.context);
+        // empty dB
+        roomUserRepository.deleteAll();
 
         retrofitShouldLoadMore = false;
 
+        List<UserPOJO> userPojoList = new ArrayList<>();
 
         // Retrofit HTTP call
         Call<RetrofitUserPOJO> call = retrofitAPIInterface.doGetUserList(urlPage, retrofitUrlPagesize, retrofitUrlSite);
@@ -112,7 +111,6 @@ public class MainActivityViewModel extends ViewModel {
                     //Log.d(TAG, "data - level 1 - items=" + itemList);
 
                     // Data level 2 - pod Items
-
                     int i = 0;
                     for (RetrofitUserPOJO.Item item:itemList) {
 
@@ -135,12 +133,14 @@ public class MainActivityViewModel extends ViewModel {
 
                         // add new User to Master List
                         //Log.d(TAG, "Adding new user to List ..");
+                        // conversion of RetrofitUserPOJO into UserPOJO - for GUI use
                         UserPOJO userPOJO = new UserPOJO(owner.userId, owner.displayName, owner.profileImage);
                         userPojoList.add(userPOJO);
 
 
                         // add new User to RoomDB for later offline use
                         Log.d(TAG, "Adding new user to Room DB ..");
+                        // conversion of RetrofitUserPOJO into RoomUserPOJO - for dB user
                         RoomUserPOJO roomUserPOJO = new RoomUserPOJO(owner.userId, owner.displayName, owner.profileImage);
 
                         roomUserRepository.insertUser(roomUserPOJO);
@@ -165,7 +165,7 @@ public class MainActivityViewModel extends ViewModel {
 
                     retrofitShouldLoadMore = true;
 
-                    // ng - response Code is not 200
+                    // Problem - response Code is not 200
                     // example 400 Bad Request - server vraci "Violation of backoff parameter","error_name":"throttle_violation" - ochrana na strane server - moc requestu za cas
                     Log.e(TAG, "Retrofit has troubles - response code in not 200 " + urlResponseCode);
 
@@ -197,7 +197,6 @@ public class MainActivityViewModel extends ViewModel {
     // if offline and persistence data exists in Room dB - get data from backup
     public void gimeMeRoomData() {
 
-        //RoomUserRepository roomUserRepository = new RoomUserRepository(MainActivity.context);
         roomUserRepository.getAllUsers();
 
     }

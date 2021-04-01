@@ -17,10 +17,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.List;
+
 import cz.vancura.retrofitstackexchangefragment.R;
 import cz.vancura.retrofitstackexchangefragment.model.UserPOJO;
 
-import static cz.vancura.retrofitstackexchangefragment.viewmodel.MainActivityViewModel.userPojoList;
+import static cz.vancura.retrofitstackexchangefragment.viewmodel.MainActivityViewModel.userPojoListLiveData;
 
 
 /**
@@ -80,6 +82,7 @@ public class DetailFragment extends Fragment {
         Log.d(TAG, "onActivityCreated");
 
         // data
+        List<UserPOJO> userPojoList = userPojoListLiveData.getValue();
         UserPOJO user = userPojoList.get(recievedPosition);
 
         String textTitle = user.getUser_name();
