@@ -259,8 +259,8 @@ public class MainActivity extends AppCompatActivity {
         // fetch data from Http
         mainActivityViewModel.gimeMeRetrofitData(retrofitUrlPage);
 
-        // IDEA: delete RoomdB here to keep only fresh data
-        // TODO IDEA: download data only once - after app start, not multiple times like device rotated or user returned from Detail
+        // TODO IDEA: delete RoomdB here to keep only fresh data
+        // TODO IDEA: download data only once - after app start, not multiple times like after device was rotated or user returned from Detail
 
 
     }

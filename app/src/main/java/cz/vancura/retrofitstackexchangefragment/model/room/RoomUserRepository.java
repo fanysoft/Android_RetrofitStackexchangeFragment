@@ -17,6 +17,7 @@ import static cz.vancura.retrofitstackexchangefragment.viewmodel.MainActivityVie
 /*
 Room dB - repository - encapsulation of CRUD methods - here only ready and insert data from/to dB
  */
+// TODO AsyncTask is depreciated - replace
 
 public class RoomUserRepository {
 
