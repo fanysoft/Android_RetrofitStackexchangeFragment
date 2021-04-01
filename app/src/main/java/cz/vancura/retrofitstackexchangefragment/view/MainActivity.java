@@ -57,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static RecyclerView mRecyclerView;
     private RecyclerAdapter mAdapter;
-    List<UserPOJO> userPojoListRecyclerView = new ArrayList<>();
 
     private ProgressBar mProgressBar;
     private TextView mTextviewError, mTextviewStatus;
@@ -114,7 +113,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onChanged(List<UserPOJO> userPOJOS) {
                 Log.d(TAG, "LiveData List of userPOJO changed - observer - can update GUI now..");
-                userPojoListRecyclerView = userPOJOS;
                 // Gui update
                 GUIShowData(userPOJOS);
             }
@@ -136,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
 
         // RecyclerView setup
         mRecyclerView = findViewById(R.id.recycler_view);
-        mAdapter = new RecyclerAdapter(userPojoListRecyclerView, this);
+        mAdapter = new RecyclerAdapter(this); // data are passed later
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());

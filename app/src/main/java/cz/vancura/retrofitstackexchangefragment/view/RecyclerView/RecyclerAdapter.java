@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import cz.vancura.retrofitstackexchangefragment.R;
@@ -24,7 +25,7 @@ RecyclerView Adapter
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyViewHolder>{
 
     private static String TAG = "myTAG-RecyclerAdapter";
-    private List<UserPOJO> dataClassList;
+    private List<UserPOJO> dataClassList = new ArrayList<>();
     private Context context;
 
 
@@ -41,8 +42,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
     }
 
     // 2 - contructor
-    public RecyclerAdapter(List<UserPOJO> dataClassList, Context context) {
-        this.dataClassList = dataClassList;
+    public RecyclerAdapter(Context context) {
         this.context = context;
     }
 
